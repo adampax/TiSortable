@@ -1,6 +1,10 @@
+// TiSortable
+// Copyright (c) 2013 Adam Paxton - Polanco Media, LLC
+// http://github.com/adampax/TiSortable
+// Licensed under the MIT License. See: /License.txt
 function SortableView(args) {
 
-	//mixin properties with the defaults
+	//mix in properties with the defaults
 	args = extend({
 		cellWidth : 95,
 		cellHeight : 95,
@@ -18,7 +22,7 @@ function SortableView(args) {
 	//FUNCTIONS
 	
 	function populate(){
-		//clear out the scrollview
+		//clear out the parent view
 	  	var viewChildren = self.children.slice(0);
 		for (var i = 0; i < viewChildren.length; ++i) {
 	        self.remove(viewChildren[i]);

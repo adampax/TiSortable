@@ -1,9 +1,9 @@
-#appname: TiSortable
-#appid: com.polancomedia.tisortable
-#type: mobile
-#guid: c1030e38-39a2-4ef5-92d8-e770c0e136da
-#version: 1.0
-#publisher: not specified
-#url: not specified
-#image: appicon.png
-#desc: not specified
+#appname:TiSortable
+#appid:com.polancomedia.tisortable
+#type:mobile
+#guid:c1030e38-39a2-4ef5-92d8-e770c0e136da
+#version:1.0
+#publisher:Adam Paxton
+#url:http://polancomedia.com
+#image:appicon.png
+#desc:not specified

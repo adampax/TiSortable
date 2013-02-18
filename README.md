@@ -1,6 +1,6 @@
 # Sortable Grid View for Titanium
 
-## Sortable. Movable. Drag and Droppable.
+### Sortable. Movable. Drag and Droppable.
 
 Make a sortable grid using native [Titanium](http://developer.appcelerator.com) controls. Inspired by and borrrowed heavily from various [Q&A](http://developer.appcelerator.com/question/67631/grid-view-is-possible-or-not) [posts](http://developer.appcelerator.com/question/101071/drag-and-drop). Uses Pedro Enrique's excellent [TiDraggable](https://github.com/pec1985/TiDraggable) module.
 
@@ -12,16 +12,14 @@ Require the CommonJS module
 var SortableView = require('/path/to/SortableView');
 ```
 
-Add some cell views to an array to be passed to the SortableView
+Add some cell views to an array that will be passed to the SortableView
 
 ```javascript
 var data = [];
 
 for (var i = 0; i < 9; i++){
     var v = Ti.UI.createView({
-        //width:95,
-        //height:95,
-        backgroundColor: 'cdcdcd'
+        backgroundColor: '#cdcdcd'
     });
     v.add(Ti.UI.createLabel({
         text: 'Cell ' + (i+1),
@@ -47,3 +45,18 @@ var view = new SortableView({
     columns: 3 //Number of columns		
 });
 ```
+
+### All Properties
+* `data:` array of views that will become the cells in your list/grid
+* `cellWidth`/`cellHeight:` size of cell in pixels
+* `columnPadding:` Space between columns
+* `rowPadding:` Space between rows
+* `columns:` Number of columns
+
+## Todos
+* Write the todos list
+
+## License
+Copyright (c) 2013 Adam Paxton - Polanco Media, LLC
+http://github.com/adampax/TiSortable
+Licensed under the MIT License. See /License.txt
