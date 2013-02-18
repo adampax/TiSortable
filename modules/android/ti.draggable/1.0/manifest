@@ -1,0 +1,18 @@
+#
+# this is your module manifest and used by Titanium
+# during compilation, packaging, distribution, etc.
+#
+version: 1.0
+apiversion: 2
+description: Ti.Draggable
+author: Pedro Enrique
+license: Apache 2
+copyright: Copyright (c) 2012 by Pedro Enrique
+
+
+# these should not be edited
+name: draggable
+moduleid: ti.draggable
+guid: b548a1e9-dbc1-48e9-ab85-caaa914fc0ec
+platform: android
+minsdk: 2.1.0
