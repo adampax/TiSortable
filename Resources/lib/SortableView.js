@@ -13,7 +13,7 @@ function SortableView(args) {
 		columns : 3
 	}, args || {});
 	
-	var cells = []
+	var cells = [],
 		posArray = [],
 		rowArray = [];
 
@@ -40,11 +40,8 @@ function SortableView(args) {
 			var column = i % args.columns,
 				top = row * (args.cellHeight + (2 * args.rowPadding)),
 				left = column * (args.cellWidth + (2 * args.columnPadding));
-			
-			Ti.API.info('cell: ' + (i+1) + ' top: ' + top);
 
 			var cell = Draggable.createView({
-				title: i,
 				position: i,
 				index: i,
 				top : top,
@@ -54,16 +51,6 @@ function SortableView(args) {
 			});
 			cell.add(args.data[i]);
 			cells.push(cell);
-						
-/*
-			if(row !== rowCheck){
-				rowCheck = row;
-				rowArray = [];
-				posArray.push(rowArray);
-				
-			}
-			
-			rowArray.push({top:top,left:left});*/
 
 			posArray.push({top:top,left:left, cellIndex: i});
 
@@ -81,38 +68,11 @@ function SortableView(args) {
 					//disable the touch
 					enableTouch(false);
 					
-					var col = '';
-					var row = '';
+					var dPositionIndex = getPositionIndex(e);
+					var testpos = getPositionIndexOld(e);
 					
-					//get the new row
-					switch(true){
-						case (e.top <= 60):
-							row = 0;
-							break;
-						case (e.top > 60 && e.top < 160):
-							row = 1;
-							break;
-						case (e.top >=160):
-							row = 2;
-							break;						
-					}						
+					Ti.API.info('old get Position: ' + testpos + ' New getPos: ' + dPositionIndex);
 					
-					//get the new column
-					switch(true){
-						case (e.left <= 60):
-							col = 0;
-							break;
-						case (e.left > 60 && e.left < 160):
-							col = 1;
-							break;
-						case (e.left >=160):
-							col = 2;
-							break;						
-					}
-			
-					
-					
-					var dPositionIndex = ((1*row)*args.columns)+col;
 					var oPositionIndex = v.position;					
 
 					//set the new position to help with animation bouncing back					
@@ -192,6 +152,68 @@ function SortableView(args) {
 			cells[i].touchEnabled = enable;
 		}
 	}
+	
+	function getPositionIndex(e){
+		
+		var totRows = cells.length / args.columns;
+		var col = args.columns-1;
+		var row = totRows-1;
+		
+		var heightMult = (args.cellHeight + (2 * args.rowPadding));
+		var widthMult = (args.cellWidth + (2 * args.columnPadding));
+		
+		//get the new row
+		for(var i = 0; i < totRows; i++){
+			if(e.top < (i * heightMult) + (heightMult / 2)){
+				row = i;
+				break;
+			}
+		}
+					
+		//get the new column
+		for(var i = 0; i < args.columns; i++){
+			if(e.left < (i * widthMult)+(widthMult/2)){
+				col = i;
+				break;
+			}
+		}
+		var dPositionIndex = ((1*row)*args.columns)+col;
+		return 	dPositionIndex;	
+	}	
+	
+	function getPositionIndexOld(e){
+		var col = '';
+		var row = '';
+		
+		//get the new row
+		switch(true){
+			case (e.top <= 60):
+				row = 0;
+				break;
+			case (e.top > 60 && e.top < 160):
+				row = 1;
+				break;
+			case (e.top >=160):
+				row = 2;
+				break;						
+		}						
+		
+		//get the new column
+		switch(true){
+			case (e.left <= 60):
+				col = 0;
+				break;
+			case (e.left > 60 && e.left < 160):
+				col = 1;
+				break;
+			case (e.left >=160):
+				col = 2;
+				break;						
+		}
+		var dPositionIndex = ((1*row)*args.columns)+col;
+		return 	dPositionIndex;	
+	}
+	
 
 	//helper function extend on object with the properties of one or more others (thanks, Dojo!)
 	function extend(obj, props) {
