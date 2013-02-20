@@ -8,7 +8,7 @@ function MainWindow(){
 	
 	for (var i = 0; i < 9; i++){
 		data.push(createCell({
-			title: i+1
+			title: i
 		}));
 	}
 	

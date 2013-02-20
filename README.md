@@ -59,4 +59,4 @@ var view = new SortableView({
 ## License
 Copyright (c) 2013 Adam Paxton - Polanco Media, LLC
 http://github.com/adampax/TiSortable
-Licensed under the MIT License. See /License.txt
+Licensed under the MIT License. See [License.txt](https://github.com/adampax/TiSortable/blob/master/LICENSE.txt)

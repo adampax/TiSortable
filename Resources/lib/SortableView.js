@@ -12,6 +12,10 @@ function SortableView(args) {
 		rowPadding : 10,
 		columns : 3
 	}, args || {});
+	
+	var cells = []
+		posArray = [],
+		rowArray = [];
 
 
 	var Draggable = require('ti.draggable'),
@@ -29,9 +33,6 @@ function SortableView(args) {
 		}
 		
 		var row = 0,
-			cells = [],
-			posArray = [],
-			rowArray = [],
 			rowCheck = '';
 	
 		for (var i = 0; i < args.data.length; i++) {
@@ -43,20 +44,18 @@ function SortableView(args) {
 			Ti.API.info('cell: ' + (i+1) + ' top: ' + top);
 
 			var cell = Draggable.createView({
+				title: i,
+				position: i,
 				index: i,
 				top : top,
 				left : left,
-				originalTop:top,
-				originalLeft:left,
 				height : args.cellHeight,
-				width : args.cellWidth,
-				zIndex : 0,
-				row: row,
-				column: column
+				width : args.cellWidth
 			});
 			cell.add(args.data[i]);
 			cells.push(cell);
 						
+/*
 			if(row !== rowCheck){
 				rowCheck = row;
 				rowArray = [];
@@ -64,7 +63,9 @@ function SortableView(args) {
 				
 			}
 			
-			rowArray.push({top:top,left:left});
+			rowArray.push({top:top,left:left});*/
+
+			posArray.push({top:top,left:left, cellIndex: i});
 
 			self.add(cells[i]);
 	
@@ -78,7 +79,7 @@ function SortableView(args) {
 				v.addEventListener('end', function(e){
 					
 					//disable the touch
-					v.touchEnabled = false;
+					enableTouch(false);
 					
 					var col = '';
 					var row = '';
@@ -107,59 +108,88 @@ function SortableView(args) {
 						case (e.left >=160):
 							col = 2;
 							break;						
-					}				
+					}
+			
 					
 					
-					var destinationCellIndex = ((1*row)*args.columns)+col;
-					var originCellIndex = v.index;	
-					
-					//disable the touch					
-					cells[destinationCellIndex].touchEnabled = false;					
-					
-				
-					//set the moved cell
+					var dPositionIndex = ((1*row)*args.columns)+col;
+					var oPositionIndex = v.position;					
 
 					//set the new position to help with animation bouncing back					
 					v.left = e.left;
 					v.top = e.top;
+									
+					animate({
+						cellIndex: v.index,
+						dPositionIndex: dPositionIndex
+					});
 					
-					var newPoints = posArray[row][col];
-					
-					var originalLeft = v.originalLeft;
-					var originalTop = v.originalTop;
-
-					//move to new location
-					v.animate({top:newPoints.top, left:newPoints.left, duration: 500});	
-					
-					//move old cell
-					cells[destinationCellIndex].animate({top: originalTop, left:originalLeft, duration: 500}, function(){
+					//move old cells
+					if(dPositionIndex !== oPositionIndex){
 						
-						//handle cell array movements on completion callback
-						//to prevent what appeared to be race conditions	
+						var dir =  (dPositionIndex > oPositionIndex) ? 1 : 0;
 						
-						//update cell properties					
-						cells[destinationCellIndex].originalTop = v.originalTop;
-						cells[destinationCellIndex].originalLeft = v.originalLeft;
-						cells[destinationCellIndex].index = v.index;
+						var startPos = (dPositionIndex > oPositionIndex) ? oPositionIndex : dPositionIndex;
 						
-						v.originalTop = v.top;
-						v.originalLeft = v.left;
-						v.index = destinationCellIndex;
+						var max = (dPositionIndex > oPositionIndex) ? ((dPositionIndex - oPositionIndex)+oPositionIndex) : ((oPositionIndex - dPositionIndex)+dPositionIndex);
 						
-						//swap array element locations
-						cells[originCellIndex] = cells[destinationCellIndex];
-						
-						cells[destinationCellIndex] = v;	
-						
-						//renable the touch
-						cells[originCellIndex].touchEnabled = true;
-						cells[destinationCellIndex].touchEnabled = true;					
-					});	
+						//splitting up the logic for now because it is hurting my brain
+						if(dPositionIndex > oPositionIndex){
+							//ascending
+							for(var i = startPos; i < max; i++){
+								
+								animate({
+									cellIndex: posArray[i+1].cellIndex,
+									dPositionIndex: i,
+									callback: (i+1) !== max ? '' : (function(){
+										enableTouch(true)
+									})
+								});		
+							}					
+						} else {
+							//descending
+							for(var i = startPos; i < max; i++){
+								
+								animate({
+									cellIndex: posArray[i].cellIndex,
+									dPositionIndex: i+1,
+									callback: (i+1) !== max ? '' : (function(){
+										enableTouch(true)
+									})
+								});	
+							}
+						}
+					} else {
+						enableTouch(true);
+					}
 					
 				});
 
 			})(cell);
 	
+		}
+	}
+	
+	function animate(obj){
+		
+		cells[obj.cellIndex].animate({top: posArray[obj.dPositionIndex].top, left: posArray[obj.dPositionIndex].left, duration: 500}, function(){
+			//handle cell array movements on completion callback
+			//to prevent what appeared to be race conditions			
+			cells[obj.cellIndex].position = obj.dPositionIndex;
+			posArray[obj.dPositionIndex].cellIndex = obj.cellIndex;
+						
+			//perform any callbacks
+			if(typeof(obj.callback) === 'function'){
+				obj.callback();
+			}	
+			
+		});			
+	}
+	
+	function enableTouch(enable){
+		//enable = enable || true;
+		for(var i = 0; i < cells.length; i++){
+			cells[i].touchEnabled = enable;
 		}
 	}
 
