@@ -69,10 +69,6 @@ function SortableView(args) {
 					enableTouch(false);
 					
 					var dPositionIndex = getPositionIndex(e);
-					var testpos = getPositionIndexOld(e);
-					
-					Ti.API.info('old get Position: ' + testpos + ' New getPos: ' + dPositionIndex);
-					
 					var oPositionIndex = v.position;					
 
 					//set the new position to help with animation bouncing back					
@@ -81,14 +77,13 @@ function SortableView(args) {
 									
 					animate({
 						cellIndex: v.index,
-						dPositionIndex: dPositionIndex
+						dPositionIndex: dPositionIndex,
+						duration: 200
 					});
 					
 					//move old cells
 					if(dPositionIndex !== oPositionIndex){
-						
-						var dir =  (dPositionIndex > oPositionIndex) ? 1 : 0;
-						
+												
 						var startPos = (dPositionIndex > oPositionIndex) ? oPositionIndex : dPositionIndex;
 						
 						var max = (dPositionIndex > oPositionIndex) ? ((dPositionIndex - oPositionIndex)+oPositionIndex) : ((oPositionIndex - dPositionIndex)+dPositionIndex);
@@ -132,17 +127,20 @@ function SortableView(args) {
 	
 	function animate(obj){
 		
-		cells[obj.cellIndex].animate({top: posArray[obj.dPositionIndex].top, left: posArray[obj.dPositionIndex].left, duration: 500}, function(){
-			//handle cell array movements on completion callback
-			//to prevent what appeared to be race conditions			
-			cells[obj.cellIndex].position = obj.dPositionIndex;
-			posArray[obj.dPositionIndex].cellIndex = obj.cellIndex;
-						
-			//perform any callbacks
-			if(typeof(obj.callback) === 'function'){
-				obj.callback();
-			}	
-			
+		cells[obj.cellIndex].animate({
+			top: posArray[obj.dPositionIndex].top, 
+			left: posArray[obj.dPositionIndex].left, 
+			duration: obj.duration || 500 
+			}, function(){
+				//handle cell array movements on completion callback
+				//to prevent what appeared to be race conditions			
+				cells[obj.cellIndex].position = obj.dPositionIndex;
+				posArray[obj.dPositionIndex].cellIndex = obj.cellIndex;
+							
+				//perform any callbacks
+				if(typeof(obj.callback) === 'function'){
+					obj.callback();
+				}	
 		});			
 	}
 	
@@ -153,14 +151,15 @@ function SortableView(args) {
 		}
 	}
 	
+	//get the position array index from the screen coords
 	function getPositionIndex(e){
 		
-		var totRows = cells.length / args.columns;
-		var col = args.columns-1;
-		var row = totRows-1;
-		
-		var heightMult = (args.cellHeight + (2 * args.rowPadding));
-		var widthMult = (args.cellWidth + (2 * args.columnPadding));
+		var totCells = cells.length,
+			totRows = Math.ceil(totCells / args.columns),
+			col = args.columns-1,
+			row = totRows-1,
+			heightMult = (args.cellHeight + (2 * args.rowPadding)),
+			widthMult = (args.cellWidth + (2 * args.columnPadding));
 		
 		//get the new row
 		for(var i = 0; i < totRows; i++){
@@ -178,42 +177,14 @@ function SortableView(args) {
 			}
 		}
 		var dPositionIndex = ((1*row)*args.columns)+col;
-		return 	dPositionIndex;	
-	}	
-	
-	function getPositionIndexOld(e){
-		var col = '';
-		var row = '';
 		
-		//get the new row
-		switch(true){
-			case (e.top <= 60):
-				row = 0;
-				break;
-			case (e.top > 60 && e.top < 160):
-				row = 1;
-				break;
-			case (e.top >=160):
-				row = 2;
-				break;						
-		}						
-		
-		//get the new column
-		switch(true){
-			case (e.left <= 60):
-				col = 0;
-				break;
-			case (e.left > 60 && e.left < 160):
-				col = 1;
-				break;
-			case (e.left >=160):
-				col = 2;
-				break;						
+		//check to see if the index is out of bounds and just set it to the last cell
+		//probably a better way to handle this
+		if(dPositionIndex >= totCells){
+			dPositionIndex = totCells-1;
 		}
-		var dPositionIndex = ((1*row)*args.columns)+col;
 		return 	dPositionIndex;	
-	}
-	
+	}		
 
 	//helper function extend on object with the properties of one or more others (thanks, Dojo!)
 	function extend(obj, props) {
