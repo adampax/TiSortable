@@ -2,7 +2,7 @@
 
 ### Sortable. Movable. Drag and Droppable.
 
-Make a sortable grid using native [Titanium](http://developer.appcelerator.com) controls. Inspired by and borrrowed heavily from various [Q&A](http://developer.appcelerator.com/question/67631/grid-view-is-possible-or-not) [posts](http://developer.appcelerator.com/question/101071/drag-and-drop). Uses Pedro Enrique's excellent [TiDraggable](https://github.com/pec1985/TiDraggable) module.
+Make a sortable grid using [Titanium](http://developer.appcelerator.com) controls. Inspired by [various](http://developer.appcelerator.com/question/67631/grid-view-is-possible-or-not) Q&A [posts](http://developer.appcelerator.com/question/101071/drag-and-drop). Uses Pedro Enrique's excellent [TiDraggable](https://github.com/pec1985/TiDraggable) module.
 
 ## Use
 
@@ -57,6 +57,6 @@ var view = new SortableView({
 * Write the todos list
 
 ## License
-Copyright (c) 2013 Adam Paxton - Polanco Media, LLC
-http://github.com/adampax/TiSortable
+Copyright (c) 2013 Adam Paxton - Polanco Media, LLC\n
+http://github.com/adampax/TiSortable\n
 Licensed under the MIT License. See [License.txt](https://github.com/adampax/TiSortable/blob/master/LICENSE.txt)
