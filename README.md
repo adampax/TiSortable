@@ -57,6 +57,6 @@ var view = new SortableView({
 * Write the todos list
 
 ## License
-Copyright (c) 2013 Adam Paxton - Polanco Media, LLC\n
-http://github.com/adampax/TiSortable\n
+Copyright (c) 2013 Adam Paxton - Polanco Media, LLC<br />
+http://github.com/adampax/TiSortable<br />
 Licensed under the MIT License. See [License.txt](https://github.com/adampax/TiSortable/blob/master/LICENSE.txt)
