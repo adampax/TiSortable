@@ -53,6 +53,14 @@ var view = new SortableView({
 * `rowPadding:` Space between rows
 * `columns:` Number of columns
 
+### Events
+
+#### move
+Fired after a cell has been moved by the user<br />
+* `index:` current index of the cell
+* `previousIndex:` last index of the cell before being moved
+*  `cell:` The view object being moved
+
 ## Todos
 * Write the todos list
 

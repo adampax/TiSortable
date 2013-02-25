@@ -1,4 +1,4 @@
-// TiSortable
+// TiSortable v 1.0.0
 // Copyright (c) 2013 Adam Paxton - Polanco Media, LLC
 // http://github.com/adampax/TiSortable
 // Licensed under the MIT License. See: /License.txt
@@ -13,9 +13,8 @@ function SortableView(args) {
 		columns : 3
 	}, args || {});
 	
-	var cells = [],
-		posArray = [],
-		rowArray = [];
+	var cells = [],   //holds all the cell views
+		posArray = []; //hold all the cell positions that will be associated with the cell view
 
 
 	var Draggable = require('ti.draggable'),
@@ -47,7 +46,8 @@ function SortableView(args) {
 				top : top,
 				left : left,
 				height : args.cellHeight,
-				width : args.cellWidth
+				width : args.cellWidth,
+				bubbleParent: false
 			});
 			cell.add(args.data[i]);
 			cells.push(cell);
@@ -69,7 +69,13 @@ function SortableView(args) {
 					enableTouch(false);
 					
 					var dPositionIndex = getPositionIndex(e);
-					var oPositionIndex = v.position;					
+					var oPositionIndex = v.position;				
+					
+					var eventData = {
+						index: dPositionIndex,
+						previousIndex: oPositionIndex,
+						cell: args.data[v.index]
+					};
 
 					//set the new position to help with animation bouncing back					
 					v.left = e.left;
@@ -78,21 +84,21 @@ function SortableView(args) {
 					animate({
 						cellIndex: v.index,
 						dPositionIndex: dPositionIndex,
-						duration: 200
+						duration: 200,
+						callback: function(){
+							self.fireEvent('move', eventData);
+						}
 					});
 					
 					//move old cells
-					if(dPositionIndex !== oPositionIndex){
-												
+					if(dPositionIndex !== oPositionIndex){						
 						var startPos = (dPositionIndex > oPositionIndex) ? oPositionIndex : dPositionIndex;
-						
 						var max = (dPositionIndex > oPositionIndex) ? ((dPositionIndex - oPositionIndex)+oPositionIndex) : ((oPositionIndex - dPositionIndex)+dPositionIndex);
 						
 						//splitting up the logic for now because it is hurting my brain
 						if(dPositionIndex > oPositionIndex){
 							//ascending
-							for(var i = startPos; i < max; i++){
-								
+							for(var i = startPos; i < max; i++){								
 								animate({
 									cellIndex: posArray[i+1].cellIndex,
 									dPositionIndex: i,
@@ -104,7 +110,6 @@ function SortableView(args) {
 						} else {
 							//descending
 							for(var i = startPos; i < max; i++){
-								
 								animate({
 									cellIndex: posArray[i].cellIndex,
 									dPositionIndex: i+1,
@@ -117,16 +122,17 @@ function SortableView(args) {
 					} else {
 						enableTouch(true);
 					}
-					
 				});
-
 			})(cell);
-	
 		}
 	}
 	
+	//perform the animation on the cell
+	//obj properties:
+	//cellIndex -- index of the cell in the cells array. Does not change
+	//dPositionIndex -- new, or destination index in the position array
+	//callback -- any callback to be performed after animation
 	function animate(obj){
-		
 		cells[obj.cellIndex].animate({
 			top: posArray[obj.dPositionIndex].top, 
 			left: posArray[obj.dPositionIndex].left, 
@@ -144,8 +150,8 @@ function SortableView(args) {
 		});			
 	}
 	
+	//enable or disable touch to move on all cells
 	function enableTouch(enable){
-		//enable = enable || true;
 		for(var i = 0; i < cells.length; i++){
 			cells[i].touchEnabled = enable;
 		}

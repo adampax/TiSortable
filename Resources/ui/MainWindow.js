@@ -26,6 +26,10 @@ function MainWindow(){
 	
 	self.add(view);
 	
+	view.addEventListener('move', function(e){
+		Ti.API.info(JSON.stringify(e));
+	});
+	
 	return self;	
 	
 	
