@@ -53,10 +53,15 @@ var view = new SortableView({
 * `rowPadding:` Space between rows
 * `columns:` Number of columns
 
-### Events
+## Methods
 
-#### move
-Fired after a cell has been moved by the user<br />
+### setData
+Sets the data in the view. Accepts an array of views.  Ex: `view.setData(dataArray);`
+
+## Events
+
+### move
+Fired after a cell has been moved by the user
 * `index:` current index of the cell
 * `previousIndex:` last index of the cell before being moved
 *  `cell:` The view object being moved

@@ -10,7 +10,8 @@ function SortableView(args) {
 		cellHeight : 95,
 		columnPadding : 10,
 		rowPadding : 10,
-		columns : 3
+		columns : 3,
+		data : []
 	}, args || {});
 	
 	var cells = [],   //holds all the cell views
@@ -20,43 +21,53 @@ function SortableView(args) {
 	var Draggable = require('ti.draggable'),
 		self = Ti.UI.createView();
 	
-	populate();
+	populate(args);
+	
+	//API
+	self.setData = function(data){
+		args.data = data || [];
+		populate(args);
+	}	
 
 	//FUNCTIONS
 	
-	function populate(){
+	function populate(obj){
 		//clear out the parent view
 	  	var viewChildren = self.children.slice(0);
 		for (var i = 0; i < viewChildren.length; ++i) {
 	        self.remove(viewChildren[i]);
 		}
 		
+		//reset the cells and position array
+		cells = [];
+		posArray = [];
+		
 		var row = 0,
 			rowCheck = '';
 	
-		for (var i = 0; i < args.data.length; i++) {
+		for (var i = 0; i < obj.data.length; i++) {
 			
-			var column = i % args.columns,
-				top = row * (args.cellHeight + (2 * args.rowPadding)),
-				left = column * (args.cellWidth + (2 * args.columnPadding));
+			var column = i % obj.columns,
+				top = row * (obj.cellHeight + (2 * obj.rowPadding)),
+				left = column * (obj.cellWidth + (2 * obj.columnPadding));
 
 			var cell = Draggable.createView({
 				position: i,
 				index: i,
 				top : top,
 				left : left,
-				height : args.cellHeight,
-				width : args.cellWidth,
+				height : obj.cellHeight,
+				width : obj.cellWidth,
 				bubbleParent: false
 			});
-			cell.add(args.data[i]);
+			cell.add(obj.data[i]);
 			cells.push(cell);
 
 			posArray.push({top:top,left:left, cellIndex: i});
 
 			self.add(cells[i]);
 	
-			if (column + 1 === args.columns) {
+			if (column + 1 === obj.columns) {
 				row++;
 			}
 	
@@ -74,7 +85,7 @@ function SortableView(args) {
 					var eventData = {
 						index: dPositionIndex,
 						previousIndex: oPositionIndex,
-						cell: args.data[v.index]
+						cell: obj.data[v.index]
 					};
 
 					//set the new position to help with animation bouncing back					
