@@ -3,6 +3,8 @@
 // http://github.com/adampax/TiSortable
 // Licensed under the MIT License. See: /License.txt
 function SortableView(args) {
+	
+	var self = Ti.UI.createView(args);
 
 	//mix in properties with the defaults
 	args = extend({
@@ -11,15 +13,16 @@ function SortableView(args) {
 		columnPadding : 10,
 		rowPadding : 10,
 		columns : 3,
-		data : []
+		data : [],
+		borderPadding: false,
+		fixRows: false
 	}, args || {});
 	
 	var cells = [],   //holds all the cell views
 		posArray = []; //hold all the cell positions that will be associated with the cell view
 
 
-	var Draggable = require('ti.draggable'),
-		self = Ti.UI.createView();
+	var Draggable = require('ti.draggable');
 	
 	populate(args);
 	
@@ -28,7 +31,7 @@ function SortableView(args) {
 		args.data = data || [];
 		populate(args);
 	}	
-
+	
 	//FUNCTIONS
 	
 	function populate(obj){
@@ -48,8 +51,8 @@ function SortableView(args) {
 		for (var i = 0; i < obj.data.length; i++) {
 			
 			var column = i % obj.columns,
-				top = row * (obj.cellHeight + (2 * obj.rowPadding)),
-				left = column * (obj.cellWidth + (2 * obj.columnPadding));
+				top = row * (obj.cellHeight + obj.rowPadding) + (args.borderPadding ? obj.rowPadding : 0),
+				left = column * (obj.cellWidth + obj.columnPadding) + (args.borderPadding ? obj.columnPadding : 0);
 
 			var cell = Draggable.createView({
 				position: i,
@@ -58,9 +61,19 @@ function SortableView(args) {
 				left : left,
 				height : obj.cellHeight,
 				width : obj.cellWidth,
-				bubbleParent: false
+				bubbleParent: false,
+				zIndex: 1,
+				minTop: obj.fixRows ? (row * top) + (obj.rowPadding * -1) : '',
+				maxTop: obj.fixRows ? (row * top) + (obj.rowPadding * 2) : ''
 			});
-			cell.add(obj.data[i]);
+			//check for empty cells and disable touch for them
+			if(obj.data[i]){
+				cell.add(obj.data[i]);
+			} else {
+				cell.isEmpty = true;
+				cell.touchEnabled = false;
+			}			
+			
 			cells.push(cell);
 
 			posArray.push({top:top,left:left, cellIndex: i});
@@ -72,13 +85,20 @@ function SortableView(args) {
 			}
 	
 			//attach the event listener to each view
-			(function(v) {							
+			(function(v) {				
+				
+				v.addEventListener('touchstart', function(e){
+					changeZIndex({
+						cellIndex: v.index,
+						zIndex: 0
+					});
+				});
 				
 				v.addEventListener('end', function(e){
 					
 					//disable the touch
 					enableTouch(false);
-					
+										
 					var dPositionIndex = getPositionIndex(e);
 					var oPositionIndex = v.position;				
 					
@@ -98,6 +118,8 @@ function SortableView(args) {
 						duration: 200,
 						callback: function(){
 							self.fireEvent('move', eventData);
+							
+					
 						}
 					});
 					
@@ -115,6 +137,12 @@ function SortableView(args) {
 									dPositionIndex: i,
 									callback: (i+1) !== max ? '' : (function(){
 										enableTouch(true)
+										
+										//change back the zIndices
+										changeZIndex({
+											cellIndex: v.index,
+											zIndex: 1
+										});		
 									})
 								});		
 							}					
@@ -126,6 +154,12 @@ function SortableView(args) {
 									dPositionIndex: i+1,
 									callback: (i+1) !== max ? '' : (function(){
 										enableTouch(true)
+										
+										//change back the zIndices
+										changeZIndex({
+											cellIndex: v.index,
+											zIndex: 1
+										});		
 									})
 								});	
 							}
@@ -161,10 +195,22 @@ function SortableView(args) {
 		});			
 	}
 	
+	//change zIndex for all but the selected cell
+	//found this works better than changing only selected cell zIndex
+	function changeZIndex(obj){
+		for(var i = 0; i < cells.length; i++){
+			if(i !== obj.cellIndex){
+				cells[i].zIndex = obj.zIndex;
+			}	
+		}		
+	}
+	
 	//enable or disable touch to move on all cells
 	function enableTouch(enable){
 		for(var i = 0; i < cells.length; i++){
-			cells[i].touchEnabled = enable;
+			if(cells[i].isEmpty !== true){
+				cells[i].touchEnabled = enable;	
+			}
 		}
 	}
 	

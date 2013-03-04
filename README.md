@@ -52,6 +52,8 @@ var view = new SortableView({
 * `columnPadding:` Space between columns
 * `rowPadding:` Space between rows
 * `columns:` Number of columns
+* `borderPadding:` add the row or column padding to the outside border of gridview
+* `fixRows:` Default false. If true, cells may only move horizontally	
 
 ## Methods
 
