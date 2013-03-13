@@ -4,7 +4,39 @@
 // Licensed under the MIT License. See: /License.txt
 function SortableView(args) {
 	
-	var self = Ti.UI.createView(args);
+	args.disableBounce = true;
+	
+	var self = Ti.UI.createScrollView(extend({
+		height: Ti.UI.SIZE,
+		width: Ti.UI.SIZE,
+	}, args || {}));
+	
+	var platformHeight = Ti.Platform.displayCaps.platformHeight;
+	
+	//scrollview vars
+	var scrollTop = 0;
+	var scrollRect = {};
+	var scrollBottom = platformHeight;  //set by default
+	var scrollWait = false;	
+	
+	function getBottom(){
+		return scrollTop + scrollBottom;
+	}	
+	
+	self.addEventListener('scroll', function(e){
+		scrollTop = e.y;
+	});
+	
+
+	var postLayoutCallback  = function(e) {
+	    //update with new height
+	    scrollBottom = self.rect.height;
+	    scrollRect = {
+	    	height: self.rect.height,
+	    	x: self.rect.x
+	    };
+	}
+	self.addEventListener('postlayout', postLayoutCallback);
 
 	//mix in properties with the defaults
 	args = extend({
@@ -64,7 +96,8 @@ function SortableView(args) {
 				bubbleParent: false,
 				zIndex: 1,
 				minTop: obj.fixRows ? (row * top) + (obj.rowPadding * -1) : '',
-				maxTop: obj.fixRows ? (row * top) + (obj.rowPadding * 2) : ''
+				maxTop: obj.fixRows ? (row * top) + (obj.rowPadding * 2) : '',
+				minLeft: obj.fixColumns ? obj.columnPadding * -1 : obj.columnPadding * -1
 			});
 			//check for empty cells and disable touch for them
 			if(obj.data[i]){
@@ -85,7 +118,66 @@ function SortableView(args) {
 			}
 	
 			//attach the event listener to each view
-			(function(v) {				
+			(function(v) {
+				
+				
+				//tracking move to see if we need to reposition the scrollview
+				v.addEventListener('move', function(e){
+					
+					//quick calc to see if we are even needing to scroll
+					//TODO see if event listener can be added only when scrolling will be needed
+					var scrollHeight = scrollRect.x + scrollRect.height;
+					var contentHeight = row * (obj.cellHeight+obj.rowPadding);
+					if(scrollRect.height >= contentHeight) { 
+						//if no scroll needed, short circuit this
+						return;
+					}
+					
+					
+					var vBottom = e.top + obj.cellHeight + obj.rowPadding;
+					var vTop = e.top;
+					
+					//when going down
+					if((vBottom > getBottom() - 50) && !scrollWait){
+						scrollWait = true;
+						
+						var newScrollTo = scrollTop+obj.cellHeight+ obj.rowPadding;
+						var newViewTop = v.top + obj.cellHeight+ obj.rowPadding;
+						
+						var scrollEnd = scrollBottom - scrollTop - (obj.cellHeight + obj.rowPadding);
+						
+						if(newScrollTo >= scrollEnd){
+							newScrollTo = scrollEnd;// + obj.cellHeight + obj.rowPadding;
+							newViewTop = scrollEnd - (obj.cellHeight + obj.rowPadding);
+						} else {
+						//move the cell as well
+						v.top = newViewTop;							
+						}
+						
+						self.scrollTo(0, newScrollTo);
+						
+						setTimeout(function(){
+							scrollWait = false;
+						}, 1000);
+						
+					//when going up
+					} else if((vTop > 50) && (vTop < scrollTop + 50) && !scrollWait){
+						scrollWait = true;
+						
+						var newScrollTo = scrollTop-obj.cellHeight - obj.rowPadding;
+						newScrollTo = newScrollTo > 0 ? newScrollTo : 0;
+						self.scrollTo(0, newScrollTo);
+						
+						//move the cell as well
+						v.top = v.top - obj.cellHeight - obj.rowPadding;
+						
+						setTimeout(function(){
+							scrollWait = false;
+						}, 1000);
+						
+					}			
+					
+				});						
 				
 				v.addEventListener('touchstart', function(e){
 					changeZIndex({
