@@ -9,7 +9,7 @@ function MainWindow(){
 
 
 	
-	for (var i = 0; i < 18; i++){
+	for (var i = 0; i < 10; i++){
 		data.push(createCell({
 			title: i
 		}));
@@ -36,7 +36,7 @@ function MainWindow(){
 	    cellHeight: 100,
 	    columnPadding: 5, //Space in between two columns
 	    rowPadding: 5, //Space in between two rows
-	    columns: 3, //Number of columns
+	    columns: 5, //Number of columns
 	    borderPadding: true, //add row/column padding to outside borders
 	    fixRows: false //if true, cells may only move horizontally	
 	});
@@ -73,11 +73,14 @@ function MainWindow(){
 	    v.add(Ti.UI.createLabel({
 	        text: args.title,
 	        color: 'black',
-	        //color: '#3f3f3f',
+	        textAlign: Titanium.UI.TEXT_ALIGNMENT_CENTER,
+	        color: '#3f3f3f',
 	        font:{
 	        	fontSize:16,
 	        	fontWeight:'bold'
-	        }
+	        },
+	        height: Ti.UI.FILL,
+	        width: Ti.UI.FILL
 	    }));
 	    return v;		
 	}

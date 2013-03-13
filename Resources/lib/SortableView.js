@@ -14,7 +14,8 @@ function SortableView(args) {
 	var platformHeight = Ti.Platform.displayCaps.platformHeight;
 	
 	//scrollview vars
-	var scrollTop = 0;
+	var scrollTop = 0,
+		scrollLeft = 0;
 	var scrollRect = {};
 	var scrollBottom = platformHeight;  //set by default
 	var scrollWait = false;	
@@ -25,6 +26,7 @@ function SortableView(args) {
 	
 	self.addEventListener('scroll', function(e){
 		scrollTop = e.y;
+		scrollLeft = e.x;
 	});
 	
 
@@ -33,7 +35,9 @@ function SortableView(args) {
 	    scrollBottom = self.rect.height;
 	    scrollRect = {
 	    	height: self.rect.height,
-	    	x: self.rect.x
+	    	width: self.rect.width,
+	    	x: self.rect.x,
+	    	y: self.rect.y
 	    };
 	}
 	self.addEventListener('postlayout', postLayoutCallback);
@@ -126,9 +130,12 @@ function SortableView(args) {
 					
 					//quick calc to see if we are even needing to scroll
 					//TODO see if event listener can be added only when scrolling will be needed
-					var scrollHeight = scrollRect.x + scrollRect.height;
+					//var scrollHeight = scrollRect.x + scrollRect.height;
 					var contentHeight = row * (obj.cellHeight+obj.rowPadding);
-					if(scrollRect.height >= contentHeight) { 
+
+					//var scrollWidth = scrollRect.y + scrollRect.width;
+					var contentWidth = obj.columns * (obj.cellHeight+obj.rowPadding);
+					if(scrollRect.height >= contentHeight && scrollRect.width >= contentWidth) { 
 						//if no scroll needed, short circuit this
 						return;
 					}
@@ -138,7 +145,10 @@ function SortableView(args) {
 					var vTop = e.top;
 					
 					//when going down
-					if((vBottom > getBottom() - 50) && !scrollWait){
+					if((vBottom > getBottom() - 50) && !scrollWait && (scrollRect.height < contentHeight)){
+						
+
+						
 						scrollWait = true;
 						
 						var newScrollTo = scrollTop+obj.cellHeight+ obj.rowPadding;
@@ -162,6 +172,11 @@ function SortableView(args) {
 						
 					//when going up
 					} else if((vTop > 50) && (vTop < scrollTop + 50) && !scrollWait){
+						if(scrollRect.width >= contentWidth) { 
+							//if no scroll needed, short circuit this
+							return;
+						}						
+						
 						scrollWait = true;
 						
 						var newScrollTo = scrollTop-obj.cellHeight - obj.rowPadding;
@@ -176,6 +191,49 @@ function SortableView(args) {
 						}, 1000);
 						
 					}			
+					
+					
+					//when going right
+					else if(e.left > (scrollLeft + scrollRect.width - 50) && !scrollWait && (scrollRect.width < contentWidth)){
+						
+						scrollWait = true;
+						
+						var newScrollTo = scrollLeft+obj.cellWidth+ obj.rowPadding;
+						var newViewLeft = v.top + obj.cellWidth+ obj.rowPadding;
+						
+						var scrollEnd = scrollRect.width - (obj.cellHeight + obj.rowPadding);
+						
+						if(newScrollTo >= scrollEnd){
+							newScrollTo = scrollEnd;// + obj.cellHeight + obj.rowPadding;
+							newViewLeft = scrollEnd - (obj.cellWidth + obj.rowPadding);
+						} else {
+						//move the cell as well
+						v.left = v.left + obj.cellWidth + obj.rowPadding;							
+						}
+						
+						self.scrollTo(newScrollTo, 0);
+						
+						setTimeout(function(){
+							scrollWait = false;
+						}, 1000);
+						
+					//when going left
+					} else if((e.left > 50) && (e.left < scrollLeft + 50) && !scrollWait && (scrollRect.width < contentWidth)){		
+						
+						scrollWait = true;
+						
+						var newScrollTo = scrollLeft-obj.cellWidth - obj.rowPadding;
+						newScrollTo = newScrollTo > 0 ? newScrollTo : 0;
+						self.scrollTo(newScrollTo, 0);
+						
+						//move the cell as well
+						v.left = v.left - obj.cellHeight - obj.rowPadding;
+						
+						setTimeout(function(){
+							scrollWait = false;
+						}, 1000);
+						
+					}	
 					
 				});						
 				
