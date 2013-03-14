@@ -11,6 +11,14 @@ function SortableView(args) {
 		width: Ti.UI.SIZE,
 	}, args || {}));
 	
+	var colHeader = Ti.UI.createView({
+		top:0,
+		left: 0,
+		height:Ti.UI.SIZE,
+		width: (args.cellWidth + args.columnPadding) * args.columns
+	});
+	self.add(colHeader);	
+	
 	var platformHeight = Ti.Platform.displayCaps.platformHeight;
 	
 	//scrollview vars
@@ -67,15 +75,17 @@ function SortableView(args) {
 		args.data = data || [];
 		populate(args);
 	}	
+
+	self.setColumnData = function(data){
+		data = data || [];
+		setColHeader(data);
+	}	
 	
 	//FUNCTIONS
 	
 	function populate(obj){
 		//clear out the parent view
-	  	var viewChildren = self.children.slice(0);
-		for (var i = 0; i < viewChildren.length; ++i) {
-	        self.remove(viewChildren[i]);
-		}
+	  	clearParentView(self, 1);
 		
 		//reset the cells and position array
 		cells = [];
@@ -83,11 +93,14 @@ function SortableView(args) {
 		
 		var row = 0,
 			rowCheck = '';
+			
+		//TODO find a way to dynamically drop down cells under column header
+		var topPadding = 20;
 	
 		for (var i = 0; i < obj.data.length; i++) {
 			
 			var column = i % obj.columns,
-				top = row * (obj.cellHeight + obj.rowPadding) + (args.borderPadding ? obj.rowPadding : 0),
+				top = row * (obj.cellHeight + obj.rowPadding) + (args.borderPadding ? obj.rowPadding : 0) + topPadding,
 				left = column * (obj.cellWidth + obj.columnPadding) + (args.borderPadding ? obj.columnPadding : 0);
 
 			var cell = Draggable.createView({
@@ -99,8 +112,8 @@ function SortableView(args) {
 				width : obj.cellWidth,
 				bubbleParent: false,
 				zIndex: 1,
-				minTop: obj.fixRows ? (row * top) + (obj.rowPadding * -1) : '',
-				maxTop: obj.fixRows ? (row * top) + (obj.rowPadding * 2) : '',
+				minTop: obj.fixRows ? (row * top) + (obj.rowPadding * -1) + topPadding : '',
+				maxTop: obj.fixRows ? (row * top) + (obj.rowPadding * 2) + topPadding : '',
 				minLeft: obj.fixColumns ? obj.columnPadding * -1 : obj.columnPadding * -1
 			});
 			//check for empty cells and disable touch for them
@@ -399,6 +412,25 @@ function SortableView(args) {
 		return 	dPositionIndex;	
 	}		
 
+	function setColHeader(data){
+		clearParentView(colHeader);
+		
+		for(var i = 0; i < data.length; i++){
+			colHeader.add(data[i]);
+		}
+	}
+	
+	//HELPER FUNCTIONS
+
+	function clearParentView(view, idx){
+		idx = idx || 0;
+		//clear out the parent view
+	  	var viewChildren = view.children.slice(0);
+		for (var i = idx; i < viewChildren.length; ++i) {
+	        view.remove(viewChildren[i]);
+		}				
+	}	
+		
 	//helper function extend on object with the properties of one or more others (thanks, Dojo!)
 	function extend(obj, props) {
 		var empty = {};	
