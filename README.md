@@ -1,4 +1,7 @@
-# Sortable Grid View for Titanium
+# Deprecation Notice
+10/12/15 -- This library is very old and no longer maintained.
+
+## Sortable Grid View for Titanium
 
 ### Sortable. Movable. Drag and Droppable.
 
